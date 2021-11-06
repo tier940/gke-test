@@ -25,14 +25,16 @@ jobs:
       uses: actions/checkout@v2
 
     # Setup gcloud CLI
-    - uses: google-github-actions/setup-gcloud@master
+    - name: Setup gcloud CLI
+      uses: google-github-actions/setup-gcloud@master
       with:
         service_account_key: ${{ env.GKE_SA }}
         project_id: ${{ env.GKE_PROJECT }}
 
-    # Get the GKE credentials so we can deploy to the cluster
-    - run: |-
-        gcloud container clusters get-credentials ${{ env.GKE_CLUSTER_NAME }} --region=${{ env.GKE_CLUSTER_REGION }} --zone=${{ env.GKE_CLUSTER_ZONE }}
+    # Get the GKE credentials so we can deploy to the cluster region
+    - name: Get GKE Clusters
+      run: |-
+        gcloud container clusters get-credentials ${{ env.GKE_CLUSTER_NAME }} --region=${{ env.GKE_CLUSTER_REGION }}
 
     # Set up kustomize
     - name: Set up Kustomize
