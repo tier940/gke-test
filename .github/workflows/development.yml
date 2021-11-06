@@ -26,12 +26,12 @@ jobs:
     # Setup gcloud CLI
     - uses: google-github-actions/setup-gcloud@master
       with:
-        service_account_key: $GKE_SA
-        project_id: $GKE_PROJECT
+        service_account_key: ${{ env.GKE_SA }}
+        project_id: ${{ env.GKE_PROJECT }}
 
     # Get the GKE credentials so we can deploy to the cluster
     - run: |-
-        gcloud container clusters get-credentials "$GKE_CLUSTER_NAME" --zone "$GKE_CLUSTER_ZONE"
+        gcloud container clusters get-credentials ${{ env.GKE_CLUSTER_NAME }} --zone ${{ env.GKE_CLUSTER_ZONE }}
 
     # Set up kustomize
     - name: Set up Kustomize
@@ -43,5 +43,5 @@ jobs:
     - name: Deploy
       run: |-
         ./kustomize build . | kubectl apply -f -
-        kubectl rollout status deployment/$DEPLOYMENT_NAME
+        kubectl rollout status deployment/${{ env.DEPLOYMENT_NAME }}
         kubectl get services -o wide
