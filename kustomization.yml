@@ -1,2 +1,2 @@
 resources:
-- ./app/nginx.yaml
+- ./apps/nginx.yaml
