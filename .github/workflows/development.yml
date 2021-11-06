@@ -9,6 +9,7 @@ on:
 env:
   GKE_PROJECT: ${{ secrets.GKE_PROJECT }}
   GKE_CLUSTER_NAME: ${{ secrets.GKE_CLUSTER_NAME }}
+  GKE_CLUSTER_REGION : ${{ secrets.GKE_CLUSTER_REGION }}
   GKE_CLUSTER_ZONE: ${{ secrets.GKE_CLUSTER_ZONE }}
   GKE_SA: ${{ secrets.GKE_SA }}
   DEPLOYMENT_NAME: test-apps
@@ -31,7 +32,7 @@ jobs:
 
     # Get the GKE credentials so we can deploy to the cluster
     - run: |-
-        gcloud container clusters get-credentials ${{ env.GKE_CLUSTER_NAME }} --zone ${{ env.GKE_CLUSTER_ZONE }}
+        gcloud container clusters get-credentials ${{ env.GKE_CLUSTER_NAME }} --region=${{ env.GKE_CLUSTER_REGION }} --zone=${{ env.GKE_CLUSTER_ZONE }}
 
     # Set up kustomize
     - name: Set up Kustomize
