@@ -26,7 +26,7 @@ jobs:
 
     # EditorConfig Check
     - name: EditorConfig Check
-       uses: zbeekman/EditorConfig-Action@v1.1.1
+      uses: zbeekman/EditorConfig-Action@v1.1.1
 
     # Setup gcloud CLI
     - name: Setup gcloud CLI
