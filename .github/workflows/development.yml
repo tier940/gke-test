@@ -24,10 +24,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    # EditorConfig Check
-    - name: EditorConfig Check
-      uses: zbeekman/EditorConfig-Action@v1.1.1
-
     # Setup gcloud CLI
     - name: Setup gcloud CLI
       uses: google-github-actions/setup-gcloud@master
