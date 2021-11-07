@@ -19,3 +19,6 @@ GithubのSettingsにある`Repository secrets`にてSAのCredentiaを貼り付�
 cd ./credentials
 gcloud iam service-accounts keys create key.json --iam-account=$SA_NAME
 ```
+
+### Memo
+![GKE デフォルトのコンテナ リソース リクエスト](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview#default_container_resource_requests)
