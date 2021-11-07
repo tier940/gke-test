@@ -12,8 +12,6 @@ env:
   GKE_CLUSTER_REGION : ${{ secrets.GKE_CLUSTER_REGION }}
   GKE_CLUSTER_ZONE: ${{ secrets.GKE_CLUSTER_ZONE }}
   GKE_SA: ${{ secrets.GKE_SA }}
-  DEPLOYMENT_NAME: test-apps
-  IMAGE: test-apps
 
 jobs:
   setup-build-publish-deploy:
@@ -51,5 +49,4 @@ jobs:
     - name: Deploy
       run: |-
         ./kustomize build . | kubectl apply -f -
-        kubectl rollout status deployment/${{ env.DEPLOYMENT_NAME }}
         kubectl get services -o wide
