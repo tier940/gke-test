@@ -1,0 +1,6 @@
+namespace: nginx
+
+resources:
+- deployment.yaml
+- configmap.yaml
+- service.yaml
