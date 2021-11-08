@@ -3,7 +3,7 @@ name: Build and Deploy to GKE
 on:
   push:
     branches:
-      - 'feature/*'
+      - 'feature/k8s/*'
 
 env:
   GKE_PROJECT: ${{ secrets.GKE_PROJECT }}
