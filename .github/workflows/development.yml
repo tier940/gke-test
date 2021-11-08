@@ -3,8 +3,7 @@ name: Build and Deploy to GKE
 on:
   push:
     branches:
-      - 'feature/*'
-      - 'bugfix/*'
+      - 'feature/k8s/*'
 
 env:
   GKE_PROJECT: ${{ secrets.GKE_PROJECT }}
@@ -19,34 +18,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
 
-    # Setup gcloud CLI
-    - name: Setup gcloud CLI
-      uses: google-github-actions/setup-gcloud@master
-      with:
-        service_account_key: ${{ env.GKE_SA }}
-        project_id: ${{ env.GKE_PROJECT }}
+      # Setup gcloud CLI
+      - name: Setup gcloud CLI
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          service_account_key: ${{ env.GKE_SA }}
+          project_id: ${{ env.GKE_PROJECT }}
 
-    # Get the GKE credentials so we can deploy to the cluster region
-    - name: Get GKE Clusters
-      run: |-
-        gcloud container clusters get-credentials ${{ env.GKE_CLUSTER_NAME }} --region=${{ env.GKE_CLUSTER_REGION }}
+      # Get the GKE credentials so we can deploy to the cluster region
+      - name: Get GKE Clusters
+        run: |-
+          gcloud container clusters get-credentials ${{ env.GKE_CLUSTER_NAME }} --region=${{ env.GKE_CLUSTER_REGION }}
 
-    # Set up kustomize
-    - name: Set up Kustomize
-      run: |-
-        curl -sfLo kustomize https://github.com/kubernetes-sigs/kustomize/releases/download/v3.1.0/kustomize_3.1.0_linux_amd64
-        chmod u+x ./kustomize
+      # Set up kustomize
+      - name: Set up Kustomize
+        run: |-
+          curl -sfLo kustomize.tar.gz https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv4.4.0/kustomize_v4.4.0_linux_amd64.tar.gz
+          tar -zxvf kustomize.tar.gz
+          chmod u+x ./kustomize
 
-    # Validation Manifests
-    - name: Validation
-      run: |-
-        ./kustomize build . | kubectl apply --validate --dry-run -f -
+      # Validation Manifests
+      - name: Validation
+        run: |-
+          ./kustomize build . | kubectl apply --validate --dry-run -f -
 
-    # Deploy the Docker image to the GKE cluster
-    - name: Deploy
-      run: |-
-        ./kustomize build . | kubectl apply -f -
-        kubectl get services -o wide
+      # Deploy the Docker image to the GKE cluster
+      - name: Deploy
+        run: |-
+          ./kustomize build . | kubectl apply -f -
+          kubectl get services -o wide
