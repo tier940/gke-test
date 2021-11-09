@@ -2,7 +2,7 @@ FROM php:7.4-fpm
 
 WORKDIR /var/www/html
 
-ADD ./docker/nginx74/php.ini /usr/local/etc/php/conf.d/99-docker.ini
+ADD ./docker/php74/php.ini /usr/local/etc/php/conf.d/99-docker.ini
 RUN apt update \
     && apt install -y git unzip bash-completion libzip-dev mariadb-client postgresql-client \
     && pecl install xdebug redis \
