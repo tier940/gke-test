@@ -1,0 +1,7 @@
+namespace: php
+
+resources:
+- namespace.yaml
+- deployment.yaml
+- configmap.yaml
+- service.yaml

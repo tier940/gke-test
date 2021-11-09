@@ -1,6 +1,5 @@
 FROM php:8.0-fpm
 
-USER www
 WORKDIR /var/www/html
 
 ADD php.ini /usr/local/etc/php/conf.d/99-docker.ini
@@ -24,3 +23,5 @@ ENV NODE_VERSION=16
 RUN curl -sL https://deb.nodesource.com/setup_$NODE_VERSION.x | bash - \
     && apt install -y nodejs \
     && npm install -g yarn npm-check-updates
+
+EXPOSE 9000
