@@ -1,11 +1,6 @@
 name: Build check
 
 on:
-  push:
-    tags:
-      - 'nginx-*'
-      - 'php74-*'
-      - 'php80-*'
   pull_request:
     tags:
       - 'nginx-*'
