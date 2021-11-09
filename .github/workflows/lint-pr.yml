@@ -1,9 +1,6 @@
 name: Lint files
 
 on:
-  push:
-    branches:
-      - 'develop'
   pull_request:
     branches:
       - 'develop'
@@ -27,7 +24,7 @@ jobs:
       - name: Install editorconfig and check
         run: |-
           npm install -g editorconfig
-          filenames=$(git diff --name-only --diff-filter=AM origin/develop)
+          filenames=$(git diff --name-only --diff-filter=ACDM origin/develop)
           if [ -n "$filenames" ]; then
             npm run lint:editorconfig -- "$filenames"
           fi
