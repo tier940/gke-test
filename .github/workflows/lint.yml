@@ -20,6 +20,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      # Install editorconfig and check
       - name: Install editorconfig and check
         run: |-
           npm install -g editorconfig
@@ -27,3 +28,15 @@ jobs:
           if [ -n "$filenames" ]; then
             npm run lint:editorconfig -- "$filenames"
           fi
+
+      # Set up kustomize
+      - name: Set up Kustomize
+        run: |-
+          curl -sfLo kustomize.tar.gz https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv4.4.0/kustomize_v4.4.0_linux_amd64.tar.gz
+          tar -zxvf kustomize.tar.gz
+          chmod u+x ./kustomize
+
+      # Validation Manifests
+      - name: Validation
+        run: |-
+          ./kustomize build . | kubectl apply --validate --dry-run -f -
