@@ -3,5 +3,4 @@ namespace: nginx
 resources:
 - namespace.yaml
 - deployment.yaml
-- configmap.yaml
 - service.yaml
