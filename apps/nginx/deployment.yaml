@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: nginx
-        image: ghcr.io/tier940/nginx:latest
+        image: ghcr.io/tier940/nginx:v1.0.0@sha256:ad54fdd2d28d6944e710f9c39f52d2bdd7e476a6a4de180e367b783fc76e6daf
         resources:
           limits:
             cpu: 100m

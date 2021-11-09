@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: php80
-        image: ghcr.io/tier940/php80:latest
+        image: ghcr.io/tier940/php80::v1.0.0@sha256:cf47065aa3e0058939cbafc070b4074d1558648c6ad892ce197b78627b237b8b
         resources:
           limits:
             cpu: 100m
