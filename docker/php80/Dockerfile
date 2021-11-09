@@ -2,7 +2,7 @@ FROM php:8.0-fpm
 
 WORKDIR /var/www/html
 
-ADD php.ini /usr/local/etc/php/conf.d/99-docker.ini
+ADD ./docker/nginx/php.ini /usr/local/etc/php/conf.d/99-docker.ini
 RUN apt update \
     && apt install -y git unzip bash-completion libzip-dev mariadb-client postgresql-client \
     && pecl install xdebug redis \
