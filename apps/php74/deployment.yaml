@@ -2,20 +2,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx
+  name: php74
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: nginx
+      app: php74
   template:
     metadata:
       labels:
-        app: nginx
+        app: php74
     spec:
       containers:
-      - name: nginx
-        image: ghcr.io/tier940/nginx:v1.0.0@sha256:ad54fdd2d28d6944e710f9c39f52d2bdd7e476a6a4de180e367b783fc76e6daf
+      - name: php74
+        image: ghcr.io/tier940/php74:v1.0.0@sha256:b93e05776283aac89478675837d4d0542efebb5af49cdbd08c0c76fb43b4e6bb
         resources:
           limits:
             cpu: 100m

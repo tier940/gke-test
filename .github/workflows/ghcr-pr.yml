@@ -1,7 +1,7 @@
-name: Build and Deploy to GitHub Container Registry
+name: Build check
 
 on:
-  push:
+  pull_request:
     tags:
       - 'nginx-*'
       - 'php74-*'
@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    name: Setup, Build, Publish, and Deploy
+    name: Setup, Build, and Check
     runs-on: ubuntu-latest
 
     steps:
@@ -34,12 +34,11 @@ jobs:
           echo "::set-output name=IMAGE_NAME::${IMAGE_NAME}"
           echo "::set-output name=IMAGE_VERSIN::${IMAGE_VERSIN}"
 
-      - name: Push image to GitHub Container Registry
+      - name: Build test docker image
         uses: docker/build-push-action@v2
         with:
           file: ./docker/${{ steps.set-docker-info.outputs.IMAGE_NAME }}/Dockerfile
-          push: true
+          load: true
           platforms: linux/amd64
           tags: |
-            ghcr.io/${{ github.repository_owner }}/${{ steps.set-docker-info.outputs.IMAGE_NAME }}:latest
-            ghcr.io/${{ github.repository_owner }}/${{ steps.set-docker-info.outputs.IMAGE_NAME }}:${{ steps.set-docker-info.outputs.IMAGE_VERSIN }}
+            ghcr.io/${{ github.repository_owner }}/${{ steps.set-docker-info.outputs.IMAGE_NAME }}:test
