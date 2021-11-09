@@ -22,9 +22,12 @@ jobs:
 
       # Install editorconfig and check
       - name: Install editorconfig and check
-        run: |-
-          npm install -g editorconfig
-          filenames=$(git diff --name-only --diff-filter=ACDM origin/develop)
-          if [ -n "$filenames" ]; then
-            npm run lint:editorconfig -- "$filenames"
-          fi
+        uses: github/super-linter@v4
+        env:
+          VALIDATE_ALL_CODEBASE: false
+          VALIDATE_DOCKER: true
+          VALIDATE_EDITORCONFIG: true
+          VALIDATE_GITHUB_ACTIONS: true
+          VALIDATE_YAML: true
+          DEFAULT_BRANCH: develop
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
