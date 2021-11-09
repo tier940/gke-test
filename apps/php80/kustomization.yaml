@@ -1,7 +1,6 @@
-namespace: php
+namespace: web-app
 
 resources:
-- namespace.yaml
 - deployment.yaml
 - configmap.yaml
 - service.yaml

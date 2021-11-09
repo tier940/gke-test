@@ -1,0 +1,5 @@
+namespace: web-app
+
+resources:
+- namespace.yaml
+- document-root.yaml

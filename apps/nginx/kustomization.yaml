@@ -1,6 +1,5 @@
-namespace: nginx
+namespace: web-app
 
 resources:
-- namespace.yaml
 - deployment.yaml
 - service.yaml
