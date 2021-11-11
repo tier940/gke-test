@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: app-volume-claim
+spec:
+  storageClassName: standard-rwo
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 30Gi
+  selector:
+    matchLabels:
+      name: app-volume

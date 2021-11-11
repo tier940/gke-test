@@ -14,23 +14,27 @@ spec:
         app: nginx
     spec:
       containers:
-      - name: nginx
-        image: ghcr.io/tier940/nginx:v1.0.1@sha256:79082c74dc2f17fe21a55d08cd126f63e3a6c2bd1f72379cf9764ca17385fe34
-        resources:
-          limits:
-            cpu: 100m
-            memory: 100Mi
-            ephemeral-storage: 5Gi
-          requests:
-            cpu: 50m
-            memory: 50Mi
-            ephemeral-storage: 5Gi
-        ports:
-        - containerPort: 80
-      #   volumeMounts:
-      #   - name: document-root-persistent-storage
-      #     mountPath: /var/www/html
-      # volumes:
-      # - name: document-root-persistent-storage
-      #   persistentVolumeClaim:
-      #     claimName: document-root
+        - name: nginx
+          image: ghcr.io/tier940/nginx:v1.0.1@sha256:79082c74dc2f17fe21a55d08cd126f63e3a6c2bd1f72379cf9764ca17385fe34
+          resources:
+            requests:
+              cpu: 50m
+              memory: 100Mi
+          ports:
+          - containerPort: 80
+          volumeMounts:
+            - mountPath: /var/www/html
+              name: public
+            - mountPath: /var/www/html
+              name: phpinfo
+      volumes:
+        - name: public
+          persistentVolumeClaim:
+            claimName: app-volume-claim
+        - name: phpinfo
+          configMap:
+            name: phpinfo
+            items:
+              - key: phpinfo.php
+                path: phpinfo.php
+                mode: 0644

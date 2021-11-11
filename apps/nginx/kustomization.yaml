@@ -3,3 +3,8 @@ namespace: web-app
 resources:
 - deployment.yaml
 - service.yaml
+
+configMapGenerator:
+- name: phpinfo
+  files:
+    - files/check-phpinfo.php

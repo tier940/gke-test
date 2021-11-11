@@ -2,5 +2,4 @@ namespace: web-app
 
 resources:
 - deployment.yaml
-- configmap.yaml
 - service.yaml

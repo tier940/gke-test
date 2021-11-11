@@ -14,33 +14,11 @@ spec:
         app: php
     spec:
       containers:
-      - name: php
-        image: ghcr.io/tier940/php74:v1.0.0@sha256:b93e05776283aac89478675837d4d0542efebb5af49cdbd08c0c76fb43b4e6bb
-        resources:
-          limits:
-            cpu: 150m
-            memory: 150Mi
-            ephemeral-storage: 5Gi
-          requests:
-            cpu: 100m
-            memory: 100Mi
-            ephemeral-storage: 5Gi
-        ports:
-        - containerPort: 9000
-        volumeMounts:
-        - mountPath: /var/www/html/
-          name: php
-      volumes:
-      - name: php
-        configMap:
-          name: php
-          items:
-            - key: check-phpinfo.php
-              path: check-phpinfo.php
-      #   volumeMounts:
-      #   - name: document-root-persistent-storage
-      #     mountPath: /var/www/html
-      # volumes:
-      # - name: document-root-persistent-storage
-      #   persistentVolumeClaim:
-      #     claimName: document-root
+        - name: php
+          image: ghcr.io/tier940/php74:v1.0.0@sha256:b93e05776283aac89478675837d4d0542efebb5af49cdbd08c0c76fb43b4e6bb
+          resources:
+            requests:
+              cpu: 50m
+              memory: 100Mi
+          ports:
+            - containerPort: 9000
