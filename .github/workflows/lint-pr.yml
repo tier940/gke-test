@@ -15,18 +15,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Set up node
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      # Install editorconfig and check
-      - name: Install editorconfig and check
+      # Set up SuperLinter and Run
+      - name: Set up SuperLinter and Run
         uses: github/super-linter@v4
         env:
           VALIDATE_ALL_CODEBASE: false
           VALIDATE_DOCKER: true
-          VALIDATE_EDITORCONFIG: true
           VALIDATE_GITHUB_ACTIONS: true
           VALIDATE_YAML: true
           DEFAULT_BRANCH: develop
