@@ -4,12 +4,9 @@ kind: PersistentVolumeClaim
 metadata:
   name: app-volume-claim
 spec:
-  storageClassName: standard-rwo
+  storageClassName: standard
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 30Gi
-  selector:
-    matchLabels:
-      name: app-volume
