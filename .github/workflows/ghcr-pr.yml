@@ -6,6 +6,11 @@ on:
       - 'feature/docker/nginx-*'
       - 'feature/docker/php74-*'
       - 'feature/docker/php80-*'
+  push:
+    branches:
+      - 'feature/docker/nginx-*'
+      - 'feature/docker/php74-*'
+      - 'feature/docker/php80-*'
 
 jobs:
   build:
