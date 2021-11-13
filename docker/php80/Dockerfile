@@ -3,8 +3,7 @@ FROM php:8.0-fpm
 # App install
 ENV DEBCONF_NOWARNINGS=yes
 RUN apt-get update \
-    && apt-get install -y \
-    && unzip libzip-dev mariadb-client postgresql-client \
+    && apt-get install -y unzip libzip-dev mariadb-client postgresql-client \
     && pecl install redis \
     && docker-php-ext-install zip pdo_mysql
 
