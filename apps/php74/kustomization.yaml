@@ -1,5 +1,0 @@
-namespace: web-app
-
-resources:
-- deployment.yaml
-- service.yaml

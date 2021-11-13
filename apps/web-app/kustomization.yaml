@@ -2,4 +2,6 @@ namespace: web-app
 
 resources:
 - namespace.yaml
+- php74/deployment.yaml
+- service.yaml
 - persistent-volume-claim.yaml

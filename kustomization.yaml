@@ -1,4 +1,2 @@
 resources:
-- ./apps/system/
-- ./apps/nginx/
-- ./apps/php74/
+- ./apps/web-app/
