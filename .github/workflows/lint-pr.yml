@@ -17,7 +17,7 @@ jobs:
 
       # Set up SuperLinter and Run
       - name: Set up SuperLinter and Run
-        uses: ghcr.io/github/super-linter:slim-latest
+        uses: ghcr.io://github/super-linter:slim-latest
         env:
           VALIDATE_ALL_CODEBASE: false
           VALIDATE_DOCKER: true
