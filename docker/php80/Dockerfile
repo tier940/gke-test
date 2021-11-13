@@ -2,13 +2,16 @@ FROM php:8.0-fpm
 
 # App install
 ENV DEBCONF_NOWARNINGS=yes
-ENV NODE_VERSION=16
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-    && nodejs apt-utils unzip libzip-dev mariadb-client postgresql-client \
+    && unzip libzip-dev mariadb-client postgresql-client \
     && pecl install redis \
-    && docker-php-ext-install zip pdo_mysql \
-    && curl -sL https://deb.nodesource.com/setup_$NODE_VERSION.x | bash -  \
+    && docker-php-ext-install zip pdo_mysql
+
+# Node install
+ENV NODE_VERSION=16
+RUN curl -sL https://deb.nodesource.com/setup_$NODE_VERSION.x | bash -  \
+    && apt-get install -y --no-install-recommends nodejs \
     && apt-get -y autoremove \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
