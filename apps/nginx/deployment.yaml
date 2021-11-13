@@ -28,8 +28,8 @@ spec:
               memory: 512Mi
               ephemeral-storage: 5Gi
           volumeMounts:
-            - mountPath: /var/www/html
-              name: public
+            - name: public
+              mountPath: /var/www/html
       volumes:
         - name: public
           persistentVolumeClaim:
