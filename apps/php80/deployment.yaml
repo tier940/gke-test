@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: php
-          image: ghcr.io/tier940/php80::v1.0.0@sha256:cf47065aa3e0058939cbafc070b4074d1558648c6ad892ce197b78627b237b8b
+          image: ghcr.io/tier940/php80::v1.0.1@sha256:d02ebfa6a53b1cc03b4eda86863519d84586ff63fe4be65f11eb9c7a520413b1
           ports:
             - containerPort: 9000
           resources:
