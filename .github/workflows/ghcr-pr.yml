@@ -3,9 +3,9 @@ name: Build check
 on:
   pull_request:
     branches:
-      - 'nginx-*'
-      - 'php74-*'
-      - 'php80-*'
+      - 'feature/docker/nginx-*'
+      - 'feature/docker/php74-*'
+      - 'feature/docker/php80-*'
 
 jobs:
   build:
