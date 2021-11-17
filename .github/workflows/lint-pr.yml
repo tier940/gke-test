@@ -21,7 +21,7 @@ jobs:
         env:
           VALIDATE_ALL_CODEBASE: false
           VALIDATE_DOCKER: true
-          VALIDATE_GITHUB_ACTIONS: true
+          VALIDATE_TERRAFORM_TFLINT: true
           VALIDATE_YAML: true
           DEFAULT_BRANCH: develop
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
