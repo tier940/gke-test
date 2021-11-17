@@ -40,6 +40,8 @@ jobs:
           DOCKER_BUILDKIT: 1
           DOCKER_CONTENT_TRUST: 1
           COMPOSE_DOCKER_CLI_BUILD: 1
+          # COMPOSE_CONVERT_WINDOWS_PATHS: true
+          # COMPOSE_PROJECT_NAME:
         with:
           context: .
           file: ./docker/${{ steps.get-docker-info.outputs.IMAGE_NAME }}/Dockerfile
