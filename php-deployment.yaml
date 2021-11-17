@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.25.0 (a70f80cc)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: php
+  name: php
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: php
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.25.0 (a70f80cc)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/app: "true"
+        io.kompose.service: php
+    spec:
+      containers:
+        - image: ghcr.io/tier940/nginx:v1.0.4@sha256:9358e5f885176182acaa014bb7964f2e6a9f541dd6fb4bade538e94e4a7c0dc4
+          name: php
+          ports:
+            - containerPort: 9000
+          resources: {}
+          volumeMounts:
+            - mountPath: /var/www/html
+              name: app-volumes
+      restartPolicy: Always
+      volumes:
+        - name: app-volumes
+          persistentVolumeClaim:
+            claimName: app-volumes
+status: {}
