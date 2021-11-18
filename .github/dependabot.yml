@@ -1,0 +1,12 @@
+version: 2
+updates:
+  - package-ecosystem: "terraform"
+    directory: "/terraform"
+    assignees:
+      - "tier940"
+    reviewers:
+      - "tier940"
+    schedule:
+      timezone: "Asia/Tokyo"
+      interval: "weekly"
+      time: "02:00"
