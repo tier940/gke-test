@@ -131,7 +131,7 @@ CLOUDINIT
 gke_config = {
   # us-central1
   "usc1" = {
-    name       = "default-pool"
+    name       = "default"
     create_key = ["blue"]
     online_key = ["blue"]
     clusters = {
