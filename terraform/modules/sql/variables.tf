@@ -1,5 +1,4 @@
-variable "tags" { type = map(string) }
-variable "project_id" { type = string }
+variable "project" { type = map(string) }
 variable "network" { type = any }
 variable "prefix" { type = string }
 variable "region" { type = string }
@@ -10,9 +9,9 @@ variable "configs" {
     disk_autoresize     = bool
     deletion_protection = bool
     instances = map(object({
-      type    = string
-      version = string
-      vaccess = string
+      type      = string
+      version   = string
+      root_pass = string
     }))
     databases = map(object({
       name      = string
@@ -34,3 +33,4 @@ variable "configs" {
     }))
   })
 }
+variable "tags" { type = map(string) }

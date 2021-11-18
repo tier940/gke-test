@@ -1,6 +1,6 @@
 terraform {
   backend "gcs" {
-    credentials = "../credentials/gcs_service_account.json"
+    credentials = "../credentials/terraform-gcs.json"
     bucket      = "test-gke-331312"
   }
 }

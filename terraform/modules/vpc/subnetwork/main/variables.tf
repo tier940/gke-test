@@ -1,4 +1,4 @@
-variable "project_id" { type = string }
+variable "project" { type = map(string) }
 variable "network_id" { type = string }
 variable "prefix" { type = string }
 variable "region" { type = string }

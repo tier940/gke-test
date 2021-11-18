@@ -1,4 +1,4 @@
-variable "project_id" { type = string }
+variable "project" { type = map(string) }
 variable "prefix" { type = string }
 variable "tags" { type = map(string) }
 variable "private" {

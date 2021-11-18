@@ -1,37 +1,27 @@
 locals {
-  db_name = "${var.tags.pj}-${var.tags.stage}-${var.tags.env}-${var.configs.name}-${var.prefix}"
-}
-
-
-###################################
-## Cloud SQL instance random string
-###################################
-# password
-resource "random_string" "root_password" {
-  length           = 16
-  special          = true
-  override_special = "_%@"
-}
-
-# db name suffix
-resource "random_id" "db_name_suffix" {
-  byte_length = 4
+  db_name = "${var.tags.stage}-${var.tags.env}-${var.configs.name}-${var.prefix}"
 }
 
 
 ###################################
 ## Cloud SQL instances
 ###################################
-resource "google_sql_database_instance" "instances" {
-  for_each = var.configs.instances
+# db name suffix
+resource "random_id" "db_name_suffix" {
+  byte_length = 4
+}
 
-  project = var.project_id
-  name    = var.tags.stage == "prd" ? local.db_name : "${local.db_name}-${random_id.db_name_suffix.hex}"
-  //name                = "${local.db_name}-${random_id.db_name_suffix.hex}"
+# create instances
+resource "google_sql_database_instance" "instances" {
+  depends_on = [random_id.db_name_suffix]
+  for_each   = var.configs.instances
+
+  project             = var.project.name
+  name                = var.tags.stage == "stg" || var.tags.stage == "prd" ? local.db_name : "${local.db_name}-${random_id.db_name_suffix.hex}"
   region              = var.region
   database_version    = each.value.version
   deletion_protection = var.configs.deletion_protection
-  root_password       = random_string.root_password.result
+  root_password       = each.value.root_pass
 
   settings {
     tier            = each.value.type
@@ -69,42 +59,24 @@ resource "google_sql_database_instance" "instances" {
   }
 }
 
-
-###################################
-## Cloud SQL users
-###################################
-# cloud proxy
-resource "google_sql_user" "proxy" {
-  depends_on = [google_sql_database_instance.instances]
-  for_each   = var.configs.users
-
-  project  = var.project_id
-  host     = "cloudsqlproxy~%"
-  name     = "proxyuser"
-  instance = google_sql_database_instance.instances[each.key].name
-}
-
-# other user
+# sql users
 resource "google_sql_user" "users" {
   depends_on = [google_sql_database_instance.instances]
   for_each   = var.configs.users
 
-  project  = var.project_id
+  project  = var.project.name
   host     = each.value.host
   name     = each.value.name
   password = each.value.pass
   instance = google_sql_database_instance.instances[each.key].name
 }
 
-
-###################################
-## Cloud SQL databases
-###################################
+# sql databases
 resource "google_sql_database" "databases" {
   depends_on = [google_sql_user.users]
   for_each   = var.configs.databases
 
-  project   = var.project_id
+  project   = var.project.name
   name      = each.value.name
   charset   = each.value.charset
   collation = each.value.collation

@@ -1,11 +1,5 @@
 variable "tags" { type = map(string) }
-variable "cloudflare_config" {
-  type = object({
-    zone_id = string
-    email   = string
-    api_key = string
-  })
-}
+variable "project" { type = map(string) }
 variable "gcp_services" {
   type = object({
     destroy   = bool
@@ -15,30 +9,26 @@ variable "gcp_services" {
   })
 }
 variable "region_list" { type = map(string) }
-variable "project_id" { type = string }
 
-variable "subnet_cidr_block_main" {
-  type = map(object({
-    public  = map(map(string))
-    private = map(map(string))
-  }))
-}
-variable "subnet_cidr_block_other" {
-  type = map(object({
-    gke = map(string)
-  }))
-}
+variable "subnet_cidr_block_main" { type = map(map(map(map(string)))) }
+variable "subnet_cidr_block_other" { type = map(map(map(string))) }
 
 variable "gce_config" {
-  type = any
+  type = map(map(object({
+    name             = string
+    dns_name         = string
+    machine_type     = string
+    root_volume      = number
+    volume_type      = string
+    image            = string
+    static_public_ip = bool
+    zone             = map(string)
+    instance_ips     = map(string)
+  })))
 }
-variable "cloud_init" {
-  type = string
-}
+variable "cloud_init" { type = string }
 
-variable "gke_config" {
-  type = any
-}
+variable "gke_config" { type = any }
 
 variable "sql_config" {
   type = map(object({
@@ -47,9 +37,9 @@ variable "sql_config" {
     disk_autoresize     = bool
     deletion_protection = bool
     instances = map(object({
-      type    = string
-      version = string
-      vaccess = string
+      type      = string
+      version   = string
+      root_pass = string
     }))
     databases = map(object({
       name      = string

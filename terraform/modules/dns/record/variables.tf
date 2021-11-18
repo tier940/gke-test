@@ -1,4 +1,4 @@
-variable "project_id" { type = string }
+variable "project" { type = map(string) }
 variable "zone" { type = any }
 variable "name" { type = string }
 variable "rrdatas" { type = any }

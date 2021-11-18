@@ -2,29 +2,27 @@
 
 ## SAの準備
 
-GKE作成後に下記を叩く。
+Terrafromでapplyするため以下を叩く。
 
 ```bash
-gcloud iam service-accounts create gke-test
-gcloud iam service-accounts list
+gcloud iam service-accounts create terraform-gcs
 gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SA_NAME --role=roles/storage.admin
+
+gcloud iam service-accounts create terraform-deploy
+gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SA_NAME --role=roles/editor --role=roles/resourcemanager.projectIamAdmin --role=roles/compute.networkAdmin
+
+gcloud iam service-accounts list | grep terraform-gcs
+gcloud iam service-accounts list | grep terraform-deploy
 ```
-
-## SAのロール変更
-
-なぜか`roles/container.admin`が付けられないので手動で`Kubernetes Engine 管理者`をつける。
-
-* [IAM](https://console.cloud.google.com/iam-admin/iam)
 
 ## SAの登録
 
-GithubのSettingsにある`Repository secrets`にてSAのCredentiaを貼り付け。
+GithubのSettingsにある`Repository secrets`にてterraform-gcsのサービスアカウントjsonとterraform-deployを貼り付け。
 
 ```base
 cd ./credentials
-gcloud iam service-accounts keys create key.json --iam-account=$SA_NAME
+gcloud iam service-accounts keys create terraform-gcs.json --iam-account=$SA_NAME
+gcloud iam service-accounts keys create terraform-deploy.json --iam-account=$SA_NAME
 ```
 
 ### メモ
-
-* [GKE デフォルトのコンテナ リソース リクエスト](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview#default_container_resource_requests)

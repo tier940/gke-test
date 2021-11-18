@@ -1,4 +1,4 @@
-variable "project_id" { type = string }
+variable "project" { type = map(string) }
 variable "target_tags" { type = list(string) }
 variable "target_tag_default" { type = string }
 variable "network" { type = string }
