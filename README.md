@@ -2,29 +2,56 @@
 
 ## SAの準備
 
-GKE作成後に下記を叩く。
+Terrafromでapplyするため以下を叩く。
 
 ```bash
-gcloud iam service-accounts create gke-test
-gcloud iam service-accounts list
-gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SA_NAME --role=roles/storage.admin
+# 環境変数保存
+export GCP_PROJECT_ID=プロジェクトID
+echo $GCP_PROJECT_ID
+
+
+# tfstate保存用のGCSアカウント
+gcloud iam service-accounts create terraform-gcs
+
+## ストレージ管理者
+gcloud projects add-iam-policy-binding $GCP_PROJECT_ID \
+  --member=serviceAccount:terraform-gcs@$GCP_PROJECT_ID.iam.gserviceaccount.com \
+  --role=roles/storage.admin
+
+
+#　terrafrom操作用のアカウント(一気に作れないため三回たたく)
+gcloud iam service-accounts create terraform-deploy
+
+## 編集者
+gcloud projects add-iam-policy-binding $GCP_PROJECT_ID \
+  --member=serviceAccount:terraform-deploy@$GCP_PROJECT_ID.iam.gserviceaccount.com \
+  --role=roles/editor
+
+## Project IAM 管理者
+gcloud projects add-iam-policy-binding $GCP_PROJECT_ID \
+  --member=serviceAccount:terraform-deploy@$GCP_PROJECT_ID.iam.gserviceaccount.com \
+  --role=roles/resourcemanager.projectIamAdmin
+
+## Compute ネットワーク管理者
+gcloud projects add-iam-policy-binding $GCP_PROJECT_ID \
+  --member=serviceAccount:terraform-deploy@$GCP_PROJECT_ID.iam.gserviceaccount.com \
+  --role=roles/compute.networkAdmin
 ```
 
-## SAのロール変更
+## サービスアカウントの取得
 
-なぜか`roles/container.admin`が付けられないので手動で`Kubernetes Engine 管理者`をつける。
+Terrafromで実行するためjsonを叩きだす。
 
-* [IAM](https://console.cloud.google.com/iam-admin/iam)
-
-## SAの登録
-
-GithubのSettingsにある`Repository secrets`にてSAのCredentiaを貼り付け。
-
-```base
+```bash
 cd ./credentials
-gcloud iam service-accounts keys create key.json --iam-account=$SA_NAME
+
+# tfstate保存用のGCSアカウント
+gcloud iam service-accounts keys create terraform-gcs.json \
+  --iam-account=terraform-gcs@$GCP_PROJECT_ID.iam.gserviceaccount.com
+
+#　terrafrom操作用のアカウント
+gcloud iam service-accounts keys create terraform-deploy.json \
+  --iam-account=terraform-deploy@$GCP_PROJECT_ID.iam.gserviceaccount.com
 ```
 
 ### メモ
-
-* [GKE デフォルトのコンテナ リソース リクエスト](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview#default_container_resource_requests)

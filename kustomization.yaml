@@ -1,2 +1,2 @@
 resources:
-- ./apps/nginx/
+- ./k8s-apps/nginx/
