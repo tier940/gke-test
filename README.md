@@ -9,23 +9,33 @@ Terrafromでapplyするため以下を叩く。
 export GCP_PROJECT_ID=プロジェクトID
 echo $GCP_PROJECT_ID
 
+
 # tfstate保存用のGCSアカウント
 gcloud iam service-accounts create terraform-gcs
+
+## ストレージ管理者
 gcloud projects add-iam-policy-binding $GCP_PROJECT_ID \
   --member=serviceAccount:terraform-gcs@$GCP_PROJECT_ID.iam.gserviceaccount.com \
   --role=roles/storage.admin
 
-#　terrafrom操作用のアカウント
+
+#　terrafrom操作用のアカウント(一気に作れないため三回たたく)
 gcloud iam service-accounts create terraform-deploy
+
+## 編集者
 gcloud projects add-iam-policy-binding $GCP_PROJECT_ID \
   --member=serviceAccount:terraform-deploy@$GCP_PROJECT_ID.iam.gserviceaccount.com \
-  --role=roles/editor \
-  --role=roles/resourcemanager.projectIamAdmin \
-  --role=roles/compute.networkAdmin
+  --role=roles/editor
 
-#　作成確認
-gcloud iam service-accounts list | grep terraform-gcs
-gcloud iam service-accounts list | grep terraform-deploy
+## Project IAM 管理者
+gcloud projects add-iam-policy-binding $GCP_PROJECT_ID \
+  --member=serviceAccount:terraform-deploy@$GCP_PROJECT_ID.iam.gserviceaccount.com \
+  --role=roles/resourcemanager.projectIamAdmin
+
+## Compute ネットワーク管理者
+gcloud projects add-iam-policy-binding $GCP_PROJECT_ID \
+  --member=serviceAccount:terraform-deploy@$GCP_PROJECT_ID.iam.gserviceaccount.com \
+  --role=roles/compute.networkAdmin
 ```
 
 ## サービスアカウントの取得
