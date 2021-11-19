@@ -1,24 +1,4 @@
 locals {
-  stages = {
-    # 開発環境にのみ作成する場合
-    dev = var.tags.stage == "dev"
-
-    # 開発環境以外に作成する場合
-    not_dev = var.tags.stage != "dev"
-
-    # 検証環境にのみ作成する場合
-    stg = var.tags.stage == "stg"
-
-    # 検証環境以外に作成する場合
-    not_stg = var.tags.stage != "stg"
-
-    # 本番環境にのみ作成する場合
-    prd = var.tags.stage == "prd"
-
-    # 本番環境以外に作成する場合
-    not_prd = var.tags.stage != "prd"
-  }
-
   # VPC設定値
   network = {
     id        = google_compute_network.default.id
@@ -147,46 +127,60 @@ resource "google_service_networking_connection" "default" {
 
 
 
-# ###################################
-# ## GCE
-# ###################################
-# # service account for config
-# module "gce_config_sa" {
-#   depends_on = [module.subnetwork_main]
-#   source     = "./modules/account"
-#   for_each   = var.region_list
+###################################
+## GCE
+###################################
+# service account for config
+module "gce_config_sa" {
+  depends_on = [module.subnetwork_main]
+  source     = "./modules/account"
+  for_each   = var.region_list
 
-#   project     = var.project
-#   account_id  = "${var.tags.stage}-${var.tags.env}-${var.gce_config[each.key].config.name}-${each.key}"
-#   description = "Service Account for gce(${var.gce_config[each.key].config.name} on stage:${var.tags.stage}, env:${var.tags.env})"
-# }
+  project     = var.project
+  account_id  = "${var.tags.stage}-${var.tags.env}-${var.gce_config[each.key].config.name}-${each.key}"
+  description = "Service Account for gce(${var.gce_config[each.key].config.name} on stage:${var.tags.stage}, env:${var.tags.env})"
+}
 
-# # gce config
-# module "gce_config" {
-#   depends_on = [module.gce_config_role]
-#   source     = "./modules/gce/instance"
-#   for_each   = var.region_list
+# account role
+module "gce_config_role" {
+  depends_on = [module.gce_config_sa]
+  source     = "./modules/account/role"
+  for_each   = var.region_list
 
-#   tags           = var.tags
-#   project        = var.project
-#   vpc_id         = local.network.id
-#   network        = local.network.self_link
-#   public_subnets = module.subnetwork_other[each.key].subnets["cfg"]
-#   prefix         = each.key
-#   region         = each.value
-#   account        = local.default_sa.gce
-#   configs        = var.gce_config[each.key].config
-#   source_fw      = [google_compute_firewall.default.name]
-#   startup_script = var.cloud_init
-#   user_data      = <<-USERDATA
-#     #cloud-config
-#     packages:
-#       - git
-#       - ansible
-#     runcmd:
-#       - echo -e "\tStrictHostKeyChecking no" >> /etc/ssh/ssh_config
-#   USERDATA
-# }
+  project = var.project
+  iam = {
+    name  = module.gce_config_sa[each.key].email
+    type  = "serviceAccount"
+    roles = ["roles/secretmanager.secretAccessor"]
+  }
+}
+
+# gce config
+module "gce_config" {
+  depends_on = [module.gce_config_role]
+  source     = "./modules/gce/instance"
+  for_each   = var.region_list
+
+  tags            = var.tags
+  project         = var.project
+  vpc_id          = local.network.id
+  network         = local.network.self_link
+  private_subnets = module.subnetwork_main[each.key].private_subnets
+  prefix          = each.key
+  region          = each.value
+  account         = module.gce_config_sa[each.key].email
+  configs         = var.gce_config[each.key].config
+  source_fw       = [google_compute_firewall.default.name]
+  startup_script  = var.cloud_init
+  user_data       = <<-USERDATA
+    #cloud-config
+    packages:
+      - git
+      - ansible
+    runcmd:
+      - echo -e "\tStrictHostKeyChecking no" >> /etc/ssh/ssh_config
+  USERDATA
+}
 
 
 
@@ -212,8 +206,8 @@ module "gke_sa_role" {
 
   project = var.project
   iam = {
-    name  = module.gke_sa[each.key].email
-    type  = "serviceAccount"
+    name = module.gke_sa[each.key].email
+    type = "serviceAccount"
     roles = [
       "roles/container.admin",
       "roles/iam.serviceAccountUser",
@@ -262,24 +256,23 @@ module "gke" {
 
 
 
-# ###################################
-# ## GCE firewall
-# ###################################
-# # config
-# module "gce_config_firewall" {
-#   depends_on = [module.gce_config]
-#   source     = "./modules/vpc/firewall"
-#   for_each   = var.region_list
+###################################
+## GCE firewall
+###################################
+# config
+module "gce_config_firewall" {
+  depends_on = [module.gce_config]
+  source     = "./modules/vpc/firewall"
+  for_each   = var.region_list
 
-#   project            = var.project
-#   target_tags        = [module.gce_config[each.key].instances.tag]
-#   target_tag_default = google_compute_firewall.default.name
-#   network            = local.network.self_link
-#   ingress = {
-#     ssh  = { name = "gce-config-${each.key}-ssh", cidrs = ["0.0.0.0/0"], ports = [22], desc = "Allow from core_config" }
-#     mosh = { name = "gce-config-${each.key}-mosh", cidrs = ["0.0.0.0/0"], ports = ["60000-61000"], protocol = "udp", desc = "Allow mosh from core_config" }
-#   }
-# }
+  project            = var.project
+  target_tags        = [module.gce_config[each.key].instances.tag]
+  target_tag_default = google_compute_firewall.default.name
+  network            = local.network.self_link
+  ingress = {
+    ssh = { name = "gce-config-${each.key}-ssh", cidrs = ["0.0.0.0/0"], ports = [22], desc = "Allow from core_config" }
+  }
+}
 
 
 

@@ -23,7 +23,7 @@ resource "google_compute_instance" "instances" {
   ]
   for_each = var.configs.instance_ips
 
-  project                   = var.project.name
+  project                   = var.project.id
   name                      = "${local.gce_name}-${each.key}"
   machine_type              = var.configs.machine_type
   zone                      = var.configs.zone[each.key]
@@ -76,7 +76,7 @@ resource "google_compute_instance" "instances" {
 resource "google_compute_address" "static_public_ip" {
   for_each = var.configs.static_public_ip ? var.configs.instance_ips : {}
 
-  project      = var.project.name
+  project      = var.project.id
   name         = "static-${local.gce_name}-${each.key}"
   description  = "Static PublicIP for gce(${var.configs.name} on env:${var.tags.env}, stage:${var.tags.stage}-${each.key})"
   region       = var.public_subnets == null ? var.private_subnets[each.key].region : var.public_subnets[each.key].region
