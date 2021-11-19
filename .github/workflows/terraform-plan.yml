@@ -12,6 +12,11 @@ env:
   GCP_WORKLOAD_IDENTITY: ${{ secrets.GCP_WORKLOAD_IDENTITY }}
   GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
+defaults:
+  run:
+    shell: bash
+    working-directory: ./terraform
+
 jobs:
   test:
     name: Terraform plan
@@ -43,7 +48,6 @@ jobs:
       # Terraform Format
       - name: Terraform Format
         run: |-
-          cd ./terraform
           terraform fmt -recursive -check
 
       - id: init
