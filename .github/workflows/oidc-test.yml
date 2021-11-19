@@ -1,0 +1,32 @@
+name: oidc test
+
+on:
+  push:
+    branches:
+      - 'feature/*/'
+
+env:
+  GCP_WORKLOAD_IDENTITY: ${{ secrets.GCP_WORKLOAD_IDENTITY }}
+  GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+jobs:
+  test:
+    name: oidc test
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: 'write'
+
+    steps:
+    - id: auth
+      name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v0.4.0
+      with:
+        create_credentials_file: true
+        workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY }}
+        service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
+        access_token_lifetime: 1200s
+
+    - name: Authenticate to Google Cloud by Workload Identity
+      run: |-
+        gcloud auth login --brief --cred-file="${{ steps.auth.outputs.credentials_file_path }}"

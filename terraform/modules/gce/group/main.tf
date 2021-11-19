@@ -19,7 +19,7 @@ data "google_secret_manager_secret_version" "default" {
 resource "google_compute_instance_template" "instances" {
   depends_on = [data.google_secret_manager_secret_version.default]
 
-  project                 = var.project.name
+  project                 = var.project.id
   name                    = local.gce_name
   machine_type            = var.configs.machine_type
   tags                    = flatten([var.source_fw, "gce-${local.gce_name}"])
@@ -52,7 +52,7 @@ resource "google_compute_instance_template" "instances" {
 
 #
 resource "google_compute_region_instance_group_manager" "instances" {
-  project                   = var.project.name
+  project                   = var.project.id
   name                      = local.gce_name
   base_instance_name        = local.gce_name
   region                    = "asia-northeast1"
