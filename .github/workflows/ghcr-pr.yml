@@ -31,13 +31,13 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.CR_PAT }}
 
-      - name: Get docker image info
+      - id: get-docker-info
+        name: Get docker image info
         run: |-
           IMAGE_NAME=$(echo ${GITHUB_REF} | awk -F'/' '{print $5}' | awk -F'-' '{print $1}')
           IMAGE_VERSIN=$(echo ${GITHUB_REF} | awk -F'/' '{print $5}' | awk -F'-' '{print $2}')
           echo "::set-output name=IMAGE_NAME::${IMAGE_NAME}"
           echo "::set-output name=IMAGE_VERSIN::${IMAGE_VERSIN}"
-        id: get-docker-info
 
       - name: Build test docker image
         uses: docker/build-push-action@v2

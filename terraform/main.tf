@@ -1,24 +1,4 @@
 locals {
-  stages = {
-    # 開発環境にのみ作成する場合
-    dev = var.tags.stage == "dev"
-
-    # 開発環境以外に作成する場合
-    not_dev = var.tags.stage != "dev"
-
-    # 検証環境にのみ作成する場合
-    stg = var.tags.stage == "stg"
-
-    # 検証環境以外に作成する場合
-    not_stg = var.tags.stage != "stg"
-
-    # 本番環境にのみ作成する場合
-    prd = var.tags.stage == "prd"
-
-    # 本番環境以外に作成する場合
-    not_prd = var.tags.stage != "prd"
-  }
-
   # VPC設定値
   network = {
     id        = google_compute_network.default.id
@@ -212,8 +192,8 @@ module "gke_sa_role" {
 
   project = var.project
   iam = {
-    name  = module.gke_sa[each.key].email
-    type  = "serviceAccount"
+    name = module.gke_sa[each.key].email
+    type = "serviceAccount"
     roles = [
       "roles/container.admin",
       "roles/iam.serviceAccountUser",
