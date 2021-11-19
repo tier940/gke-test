@@ -1,0 +1,99 @@
+name: Terraform plan
+
+on:
+  pull_request:
+    branches:
+      - 'feature/terraform/*'
+
+env:
+  GCP_WORKLOAD_IDENTITY: ${{ secrets.GCP_WORKLOAD_IDENTITY }}
+  GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+jobs:
+  test:
+    name: Terraform plan
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: 'write'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # Authenticate to Google Cloud
+      - id: auth
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v0.4.0
+        with:
+          create_credentials_file: true
+          workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY }}
+          service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
+          access_token_lifetime: 1200s
+
+      # Authenticate to Google Cloud by Workload Identity
+      - name: Authenticate to Google Cloud by Workload Identity
+        run: |-
+          gcloud auth login --brief --cred-file="${{ steps.auth.outputs.create_credentials_file }}"
+
+      # Setup Project
+      - name: Set Project
+        run: |-
+          gcloud config set project ${{ steps.auth.outputs.project_id }}
+
+      # Setup Terraform
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.11
+
+      # Terraform Format
+      - name: Terraform Format
+        run: |-
+          cd ./terraform
+          terraform fmt -recursive -check
+
+      - id: init
+        name: Terraform Init
+        run: |-
+          terraform init
+
+      - id: validate
+        name: Terraform Validate
+        run: |-
+          terraform validate -no-color
+
+      - id: plan
+        name: Terraform Plan
+        continue-on-error: true
+        run: |-
+          terraform plan -no-color -var-file="env/dev.tfvars"
+
+      - uses: actions/github-script@0.9.0
+        if: github.event_name == 'pull_request'
+        env:
+          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |-
+            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+            #### Terraform Validation 🤖\`${{ steps.validate.outputs.stdout }}\`
+            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+
+            <details><summary>Show Plan</summary>
+
+            \`\`\`\n
+            ${process.env.PLAN}
+            \`\`\`
+
+            </details>
+
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
