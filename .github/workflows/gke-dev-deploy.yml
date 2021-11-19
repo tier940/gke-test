@@ -1,0 +1,65 @@
+name: Build and Deploy to GKE
+
+on:
+  push:
+    branches:
+      - 'feature/k8s/*'
+
+env:
+  GKE_CLUSTER_NAME: ${{ secrets.GKE_CLUSTER_NAME }}
+  GKE_CLUSTER_REGION : ${{ secrets.GKE_CLUSTER_REGION }}
+  GKE_CLUSTER_ZONE: ${{ secrets.GKE_CLUSTER_ZONE }}
+  GCP_WORKLOAD_IDENTITY: ${{ secrets.GCP_WORKLOAD_IDENTITY }}
+  GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+jobs:
+  setup-build-publish-deploy:
+    name: Setup, Build, Publish, and Deploy
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: 'write'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # Authenticate to Google Cloud
+      - id: auth
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v0.4.0
+        with:
+          create_credentials_file: true
+          workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY }}
+          service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
+          access_token_lifetime: 1200s
+
+      # Authenticate to Google Cloud by Workload Identity
+      - name: Authenticate to Google Cloud by Workload Identity
+        run: |-
+          gcloud auth login --brief --cred-file="${{ steps.auth.outputs.create_credentials_file }}"
+
+      # Get the GKE credentials so we can deploy to the cluster region
+      - name: Get GKE Clusters
+        run: |-
+          gcloud container clusters get-credentials ${{ env.GKE_CLUSTER_NAME }} \
+            --region=${{ env.GKE_CLUSTER_REGION }} \
+            --project=${{ steps.auth.outputs.project_id }}
+
+      # Set up kustomize
+      - name: Set up Kustomize
+        run: |-
+          curl -sfLo kustomize.tar.gz https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv4.4.0/kustomize_v4.4.0_linux_amd64.tar.gz
+          tar -zxvf kustomize.tar.gz
+          chmod u+x ./kustomize
+
+      # Validation Manifests
+      - name: Validation
+        run: |-
+          ./kustomize build . | kubectl apply --validate --dry-run -f -
+
+      # Deploy the Docker image to the GKE cluster
+      - name: Deploy
+        run: |-
+          ./kustomize build . | kubectl apply -f -
+          kubectl get services -o wide
