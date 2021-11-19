@@ -4,6 +4,9 @@ on:
   pull_request:
     branches:
       - 'feature/terraform/*'
+  push:
+    branches:
+      - 'feature/terraform/*'
 
 env:
   GCP_WORKLOAD_IDENTITY: ${{ secrets.GCP_WORKLOAD_IDENTITY }}
