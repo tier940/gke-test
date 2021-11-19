@@ -43,10 +43,10 @@ jobs:
       # Validation Manifests
       - name: Validation
         run: |-
-          ./kustomize build . | kubectl apply --validate --dry-run -f -
+          ./kustomize build ./k8s-apps/web-app | kubectl apply --validate --dry-run -f -
 
       # Deploy the Docker image to the GKE cluster
       - name: Deploy
         run: |-
-          ./kustomize build . | kubectl apply -f -
+          ./kustomize build ./k8s-apps/web-app | kubectl apply -f -
           kubectl get services -o wide
