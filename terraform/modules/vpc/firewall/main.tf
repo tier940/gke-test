@@ -2,7 +2,7 @@
 resource "google_compute_firewall" "ingress" {
   for_each = var.ingress
 
-  project       = var.project.name
+  project       = var.project.id
   direction     = "INGRESS"
   name          = each.value.name
   target_tags   = lookup(each.value, "target_tags", [var.target_tag_default])
@@ -20,7 +20,7 @@ resource "google_compute_firewall" "ingress" {
 resource "google_compute_firewall" "egress" {
   for_each = var.egress
 
-  project       = var.project.name
+  project       = var.project.id
   direction     = "EGRESS"
   name          = each.value.name
   target_tags   = lookup(each.value, "target_tags", [var.target_tag_default])
