@@ -6,32 +6,46 @@ on:
       - 'feature/k8s/*'
 
 env:
-  GKE_PROJECT: ${{ secrets.GKE_PROJECT }}
   GKE_CLUSTER_NAME: ${{ secrets.GKE_CLUSTER_NAME }}
   GKE_CLUSTER_REGION : ${{ secrets.GKE_CLUSTER_REGION }}
   GKE_CLUSTER_ZONE: ${{ secrets.GKE_CLUSTER_ZONE }}
-  GKE_SA: ${{ secrets.GKE_SA }}
+  GCP_WORKLOAD_IDENTITY: ${{ secrets.GCP_WORKLOAD_IDENTITY }}
+  GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ./k8s-apps
 
 jobs:
   setup-build-publish-deploy:
     name: Setup, Build, Publish, and Deploy
     runs-on: ubuntu-latest
 
+    permissions:
+      id-token: 'write'
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      # Setup gcloud CLI
-      - name: Setup gcloud CLI
-        uses: google-github-actions/setup-gcloud@master
+      # Authenticate to Google Cloud
+      - id: auth
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v0.4.0
         with:
-          service_account_key: ${{ env.GKE_SA }}
-          project_id: ${{ env.GKE_PROJECT }}
+          create_credentials_file: true
+          workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY }}
+          service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
+          access_token_lifetime: 1200s
 
       # Get the GKE credentials so we can deploy to the cluster region
       - name: Get GKE Clusters
-        run: |-
-          gcloud container clusters get-credentials ${{ env.GKE_CLUSTER_NAME }} --region=${{ env.GKE_CLUSTER_REGION }}
+        uses: google-github-actions/get-gke-credentials@v0.3.0
+        with:
+          project_id: ${{ steps.auth.outputs.project_id }}
+          cluster_name: ${{ env.GKE_CLUSTER_NAME }}
+          location: ${{ env.GKE_CLUSTER_REGION }}
 
       # Set up kustomize
       - name: Set up Kustomize
