@@ -1,0 +1,7 @@
+namespace: web-app
+
+resources:
+- namespace.yaml
+- persistent-volume-claim.yaml
+- php74/deployment.yaml
+- service.yaml

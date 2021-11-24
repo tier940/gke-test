@@ -1,0 +1,57 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-app
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 50%
+      maxSurge: 0%
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web-app
+  template:
+    metadata:
+      labels:
+        app: web-app
+    spec:
+      restartPolicy: Always
+      volumes:
+        - name: app-volume
+          persistentVolumeClaim:
+            claimName: app-volume-claim
+      containers:
+        - name: php
+          image: ghcr.io/tier940/php80:v1.0.1@sha256:d02ebfa6a53b1cc03b4eda86863519d84586ff63fe4be65f11eb9c7a520413b1
+          ports:
+            - containerPort: 9000
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 250m
+              memory: 512Mi
+              ephemeral-storage: 5Gi
+            requests:
+              cpu: 50m
+              memory: 256Mi
+              ephemeral-storage: 5Gi
+          volumeMounts:
+            - name: app-volume
+              mountPath: /var/www/html
+        - name: nginx
+          image: ghcr.io/tier940/nginx:v1.0.4@sha256:9358e5f885176182acaa014bb7964f2e6a9f541dd6fb4bade538e94e4a7c0dc4
+          ports:
+            - containerPort: 80
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 250m
+              memory: 512Mi
+              ephemeral-storage: 5Gi
+            requests:
+              cpu: 50m
+              memory: 256Mi
+              ephemeral-storage: 5Gi
