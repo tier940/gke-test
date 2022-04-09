@@ -59,12 +59,6 @@ jobs:
         with:
           tflint_version: v0.35.0
 
-      - name: Init TFLint
-        run: tflint --init
-
-      - name: Run TFLint
-        run: tflint -f compact
-
       # Setup github action only setting
       - name: Setup github action only setting
         run: |-
@@ -83,6 +77,12 @@ jobs:
         name: Terraform Validate
         run: |-
           terraform validate -no-color
+
+      - name: Init TFLint
+        run: tflint --init
+
+      - name: Run TFLint
+        run: tflint -f compact
 
       - id: plan
         name: Terraform Plan
