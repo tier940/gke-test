@@ -5,10 +5,16 @@
 Terrafromでapplyするため以下を叩く。
 
 ```bash
+# Google Cloud SDK ログイン
+gcloud auth login 
+gcloud auth application-default login
+
 # 環境変数保存
 export GCP_PROJECT_ID=プロジェクトID
 echo ${GCP_PROJECT_ID}
 
+# 
+gcloud config set project ${GCP_PROJECT_ID}
 
 # tfstate保存用のGCSアカウント
 gcloud iam service-accounts create terraform-gcs
@@ -17,7 +23,6 @@ gcloud iam service-accounts create terraform-gcs
 gcloud projects add-iam-policy-binding ${GCP_PROJECT_ID} \
     --member=serviceAccount:terraform-gcs@${GCP_PROJECT_ID}.iam.gserviceaccount.com \
     --role=roles/storage.admin
-
 
 #　terrafrom操作用のアカウント(一気に作れないため三回たたく)
 gcloud iam service-accounts create terraform-deploy

@@ -5,7 +5,7 @@ tags = {
 }
 project = {
   name = "test-gke"
-  id   = "test-gke-331312"
+  id   = "sandbox-346202"
 }
 gcp_services = {
   destroy   = false
@@ -136,7 +136,7 @@ gke_config = {
     online_key = ["blue"]
     clusters = {
       blue = {
-        version = "1.21."
+        version = "1.22."
         zone    = ["us-central1-c"]
         addons = {
           load_balancing = true
@@ -147,7 +147,7 @@ gke_config = {
         }
       }
       green = {
-        version = "1.22."
+        version = "1.23."
         zone    = ["us-central1-c"]
         addons = {
           load_balancing = true

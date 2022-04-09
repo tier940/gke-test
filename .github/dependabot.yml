@@ -8,5 +8,5 @@ updates:
       - "tier940"
     schedule:
       timezone: "Asia/Tokyo"
-      interval: "weekly"
-      time: "02:00"
+      interval: "monthly"
+      time: "00:00"

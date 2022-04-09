@@ -1,5 +1,5 @@
 terraform {
-  required_version = "1.0.11"
+  required_version = "1.1.8"
 
   required_providers {
     local = {
@@ -12,11 +12,11 @@ terraform {
     }
     google = {
       source  = "hashicorp/google"
-      version = "4.15.0"
+      version = "4.16.0"
     }
     google-beta = {
       source  = "hashicorp/google-beta"
-      version = "4.13.0"
+      version = "4.16.0"
     }
   }
 }

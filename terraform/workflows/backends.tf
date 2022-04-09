@@ -1,5 +1,6 @@
 terraform {
   backend "gcs" {
-    bucket = "test-gke-331312"
+    bucket = "sandbox-346202"
+    prefix = "test-gke"
   }
 }
