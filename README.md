@@ -6,7 +6,7 @@ Terrafromでapplyするため以下を叩く。
 
 ```bash
 # Google Cloud SDK ログイン
-gcloud auth login 
+gcloud auth login
 gcloud auth application-default login
 
 # 環境変数保存

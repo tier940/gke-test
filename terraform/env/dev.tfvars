@@ -136,7 +136,7 @@ gke_config = {
     online_key = ["blue"]
     clusters = {
       blue = {
-        version = "1.22."
+        version = "1.23."
         zone    = ["us-central1-c"]
         addons = {
           load_balancing = true
@@ -147,7 +147,7 @@ gke_config = {
         }
       }
       green = {
-        version = "1.23."
+        version = "1.24."
         zone    = ["us-central1-c"]
         addons = {
           load_balancing = true
@@ -163,7 +163,7 @@ gke_config = {
         image_type   = "COS_CONTAINERD"
         machine_type = "e2-small"
         root_volume  = 10
-        size         = { min = 1, max = 3, init = 1 }
+        size         = { min = 1, max = 2, init = 2 }
         upgrade      = { surge = 1, unavailable = 1 }
         management   = { auto_repair = true, auto_upgrade = false }
       }
@@ -171,7 +171,7 @@ gke_config = {
         image_type   = "COS_CONTAINERD"
         machine_type = "e2-small"
         root_volume  = 10
-        size         = { min = 1, max = 3, init = 1 }
+        size         = { min = 1, max = 2, init = 2 }
         upgrade      = { surge = 1, unavailable = 1 }
         management   = { auto_repair = true, auto_upgrade = false }
       }

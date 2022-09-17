@@ -3,10 +3,10 @@ name: Terraform plan
 on:
   pull_request:
     branches:
-      - 'feature/terraform/*'
+      - feature/terraform/*
   push:
     branches:
-      - 'feature/terraform/*'
+      - feature/terraform/*
 
 env:
   GCP_WORKLOAD_IDENTITY: ${{ secrets.GCP_WORKLOAD_IDENTITY }}
@@ -25,7 +25,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
     permissions:
-      id-token: 'write'
+      id-token: write
 
     steps:
       - name: Checkout
@@ -57,7 +57,7 @@ jobs:
       - uses: terraform-linters/setup-tflint@v1
         name: Setup TFLint
         with:
-          tflint_version: v0.35.0
+          tflint_version: v0.40.0
 
       # Setup github action only setting
       - name: Setup github action only setting
