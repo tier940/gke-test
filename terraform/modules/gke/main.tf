@@ -57,9 +57,9 @@ resource "google_container_cluster" "clusters" {
     # filestore.csi.storage.gke.io
     # https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/filestore-csi-driver
   }
-  workload_identity_config {
-    workload_pool = "${var.project.id}.svc.id.goog"
-  }
+  # workload_identity_config {
+  #   workload_pool = "${var.project.id}.svc.id.goog"
+  # }
   master_authorized_networks_config {
     dynamic "cidr_blocks" {
       for_each = each.value.authorized_cidr
@@ -125,6 +125,9 @@ resource "google_container_node_pool" "nodes" {
     metadata = {
       disable-legacy-endpoints = true
     }
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/cloud-platform"
+    ]
   }
 
   lifecycle {

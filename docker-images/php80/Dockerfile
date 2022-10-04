@@ -10,7 +10,7 @@ RUN apt-get update \
 # Node install
 ENV NODE_VERSION=16
 RUN curl -sL https://deb.nodesource.com/setup_$NODE_VERSION.x | bash -  \
-    && apt-get install -y nodejs \
+    && apt-get install -y --no-install-recommends nodejs \
     && apt-get -y autoremove \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
