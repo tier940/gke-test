@@ -127,6 +127,101 @@ resource "google_service_networking_connection" "default" {
 
 
 
+###################################
+## Cloud Composer
+###################################
+# service account for config
+module "composer_config_sa" {
+  depends_on = [module.subnetwork_main]
+  source     = "./modules/account"
+  for_each   = var.region_list
+
+  project     = var.project
+  account_id  = "${var.tags.stage}-${var.tags.env}-${var.composer_config[each.key].name}-${each.key}"
+  description = "Service Account for composer(${var.composer_config[each.key].name} on stage:${var.tags.stage}, env:${var.tags.env})"
+}
+
+# account role
+resource "google_service_account_iam_member" "composer_init_sa" {
+  depends_on = [module.composer_config_sa]
+  for_each   = var.region_list
+
+  service_account_id = module.composer_config_sa[each.key].id
+  role               = "roles/composer.ServiceAgentV2Ext"
+  member             = "serviceAccount:service-726713242948@cloudcomposer-accounts.iam.gserviceaccount.com"
+}
+module "composer_config_role" {
+  depends_on = [module.composer_config_sa]
+  source     = "./modules/account/role"
+  for_each   = var.region_list
+
+  project = var.project
+  iam = {
+    name  = module.composer_config_sa[each.key].email
+    type  = "serviceAccount"
+    roles = ["roles/composer.worker"]
+  }
+}
+
+# composer
+# module "composer" {
+#   depends_on = [module.composer_config_role]
+#   source     = "./modules/composer"
+#   for_each   = var.region_list
+
+#   project    = var.project
+#   region     = each.value
+#   network    = local.network.self_link
+#   subnetwork = module.subnetwork_main[each.key].private_subnets["01"].self_link
+#   account    = module.composer_config_sa[each.key].email
+#   config     = var.composer_config[each.key]
+#   tags       = var.tags
+# }
+resource "google_composer_environment" "default" {
+  depends_on = [google_service_account_iam_member.composer_init_sa]
+  project    = var.project.id
+  name       = "example-composer-env-tf-c2"
+  region     = "us-central1"
+  config {
+
+    software_config {
+      image_version = "composer-2.0.28-airflow-2.3.3"
+    }
+
+    workloads_config {
+      scheduler {
+        cpu        = 0.5
+        memory_gb  = 1.875
+        storage_gb = 1
+        count      = 1
+      }
+      web_server {
+        cpu        = 0.5
+        memory_gb  = 1.875
+        storage_gb = 1
+      }
+      worker {
+        cpu        = 0.5
+        memory_gb  = 1.875
+        storage_gb = 1
+        min_count  = 1
+        max_count  = 3
+      }
+
+
+    }
+    environment_size = "ENVIRONMENT_SIZE_SMALL"
+
+    node_config {
+      network         = local.network.self_link
+      subnetwork      = module.subnetwork_main["usc1"].private_subnets["01"].self_link
+      service_account = module.composer_config_sa["usc1"].email
+    }
+  }
+}
+
+
+
 # ###################################
 # ## GCE
 # ###################################
@@ -184,54 +279,54 @@ resource "google_service_networking_connection" "default" {
 
 
 
-###################################
-## GKE
-###################################
-# service account
-module "gke_sa" {
-  depends_on = [module.subnetwork_other]
-  source     = "./modules/account"
-  for_each   = var.region_list
+# ###################################
+# ## GKE
+# ###################################
+# # service account
+# module "gke_sa" {
+#   depends_on = [module.subnetwork_other]
+#   source     = "./modules/account"
+#   for_each   = var.region_list
 
-  project     = var.project
-  account_id  = "${var.tags.stage}-${var.tags.env}-${var.gke_config[each.key].name}-${each.key}"
-  description = "Service Account for gke node(${var.gke_config[each.key].name} on stage:${var.tags.stage}, env:${var.tags.env})"
-}
+#   project     = var.project
+#   account_id  = "${var.tags.stage}-${var.tags.env}-${var.gke_config[each.key].name}-${each.key}"
+#   description = "Service Account for gke node(${var.gke_config[each.key].name} on stage:${var.tags.stage}, env:${var.tags.env})"
+# }
 
-# account role
-module "gke_sa_role" {
-  depends_on = [module.gke_sa]
-  source     = "./modules/account/role"
-  for_each   = var.region_list
+# # account role
+# module "gke_sa_role" {
+#   depends_on = [module.gke_sa]
+#   source     = "./modules/account/role"
+#   for_each   = var.region_list
 
-  project = var.project
-  iam = {
-    name = module.gke_sa[each.key].email
-    type = "serviceAccount"
-    roles = [
-      "roles/container.admin",
-      "roles/iam.serviceAccountUser",
-      "roles/file.editor"
-    ]
-  }
-}
+#   project = var.project
+#   iam = {
+#     name = module.gke_sa[each.key].email
+#     type = "serviceAccount"
+#     roles = [
+#       "roles/container.admin",
+#       "roles/iam.serviceAccountUser",
+#       "roles/file.editor"
+#     ]
+#   }
+# }
 
-# cluster
-module "gke" {
-  depends_on = [module.gke_sa_role]
-  source     = "./modules/gke"
-  for_each   = var.region_list
+# # cluster
+# module "gke" {
+#   depends_on = [module.gke_sa_role]
+#   source     = "./modules/gke"
+#   for_each   = var.region_list
 
-  tags      = var.tags
-  project   = var.project
-  vpc_id    = local.network.id
-  prefix    = each.key
-  region    = each.value
-  account   = module.gke_sa[each.key].email
-  subnets   = module.subnetwork_other[each.key].subnets["gke"]
-  source_fw = [google_compute_firewall.default.name]
-  configs   = var.gke_config[each.key]
-}
+#   tags      = var.tags
+#   project   = var.project
+#   vpc_id    = local.network.id
+#   prefix    = each.key
+#   region    = each.value
+#   account   = module.gke_sa[each.key].email
+#   subnets   = module.subnetwork_other[each.key].subnets["gke"]
+#   source_fw = [google_compute_firewall.default.name]
+#   configs   = var.gke_config[each.key]
+# }
 
 
 

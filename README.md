@@ -106,3 +106,12 @@ echo ${WORKLOAD_IDENTITY_POOL_ID}/providers/${PROVIDER_NAME}
 ```
 
 </details>
+
+<details>
+```bash
+# Cloud Composer初回作成(プロジェクト毎に一度だけ)
+gcloud projects add-iam-policy-binding SERVICE_ACCOUNT \
+    --member serviceAccount:service-PROJECT_NUMBER@cloudcomposer-accounts.iam.gserviceaccount.com \
+    --role roles/composer.ServiceAgentV2Ext
+```
+</details>

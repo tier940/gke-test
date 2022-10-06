@@ -34,7 +34,8 @@ gcp_services = {
     "dns.googleapis.com",               # Cloud DNS API
     "cloudbuild.googleapis.com",        # Cloud Build API
     "networkmanagement.googleapis.com", # Network Management API
-    "secretmanager.googleapis.com"      # Secret Manager API
+    "secretmanager.googleapis.com",     # Secret Manager API
+    "composer.googleapis.com",          # Cloud Composer API
   ]
 }
 region_list = {
@@ -65,6 +66,44 @@ subnet_cidr_block_other = {
   "usc1" = {
     gke = { az = "a", cidr = "150.1.0.0/22", private_access = true }
     cfg = { az = "a", cidr = "50.1.0.0/20", private_access = true }
+  }
+}
+
+
+
+###################################
+#  Composer Config
+###################################
+composer_config = {
+  "usc1" = {
+    name             = "test-composer"
+    version          = "composer-2.0.28-airflow-2.3.3"
+    environment_size = "ENVIRONMENT_SIZE_SMALL" # ENVIRONMENT_SIZE_SMALL, ENVIRONMENT_SIZE_MEDIUM, and ENVIRONMENT_SIZE_LARGE.
+    "software" = {
+      "airflow"       = {}
+      "pypi_packages" = {}
+      "env_variables" = {}
+    }
+    "worker" = {
+      "scheduler" = {
+        cpu        = 0.5
+        memory_gb  = 1.875
+        storage_gb = 1
+        count      = 1
+      },
+      "webserver" = {
+        cpu        = 0.5
+        memory_gb  = 1.875
+        storage_gb = 1
+      },
+      "worker" = {
+        cpu        = 0.5
+        memory_gb  = 1.875
+        storage_gb = 1
+        min_count  = 1
+        max_count  = 3
+      }
+    }
   }
 }
 

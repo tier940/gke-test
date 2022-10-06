@@ -13,6 +13,8 @@ variable "region_list" { type = map(string) }
 variable "subnet_cidr_block_main" { type = map(map(map(map(string)))) }
 variable "subnet_cidr_block_other" { type = map(map(map(string))) }
 
+variable "composer_config" { type = any }
+
 variable "gce_config" {
   type = map(map(object({
     name             = string

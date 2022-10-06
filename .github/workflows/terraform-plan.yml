@@ -47,11 +47,16 @@ jobs:
           service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
           access_token_lifetime: 1200s
 
+      # Detect Terraform version
+      - name: Detect Terraform version
+        run: |
+          printf "TF_VERSION=%s" $(cat .terraform-version) >> $GITHUB_ENV
+
       # Setup Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: 1.1.8
+          terraform_version: ${{ env.TF_VERSION }}
 
       # Setup TFlint
       - uses: terraform-linters/setup-tflint@v1
