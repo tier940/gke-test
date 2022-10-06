@@ -170,56 +170,19 @@ module "composer_config_role_agent" {
 }
 
 # composer
-# module "composer" {
-#   depends_on = [module.composer_config_role_agent]
-#   source     = "./modules/composer"
-#   for_each   = var.region_list
-
-#   project    = var.project
-#   region     = each.value
-#   network    = local.network.self_link
-#   subnetwork = module.subnetwork_main[each.key].private_subnets["01"].self_link
-#   account    = module.composer_config_sa[each.key].email
-#   config     = var.composer_config[each.key]
-#   tags       = var.tags
-# }
-resource "google_composer_environment" "default" {
+module "composer_instance" {
   depends_on = [module.composer_config_role_agent]
-  project    = var.project.id
-  name       = "example-composer-env-tf-c2"
-  region     = "us-central1"
-  config {
-    software_config {
-      image_version = "composer-2.0.28-airflow-2.3.3"
-    }
-    # workloads_config {
-    #   scheduler {
-    #     cpu        = 0.5
-    #     memory_gb  = 1.875
-    #     storage_gb = 1
-    #     count      = 1
-    #   }
-    #   web_server {
-    #     cpu        = 0.5
-    #     memory_gb  = 1.875
-    #     storage_gb = 1
-    #   }
-    #   worker {
-    #     cpu        = 0.5
-    #     memory_gb  = 1.875
-    #     storage_gb = 1
-    #     min_count  = 1
-    #     max_count  = 3
-    #   }
-    # }
-    environment_size = "ENVIRONMENT_SIZE_SMALL"
+  source     = "./modules/composer"
+  for_each   = var.region_list
 
-    node_config {
-      network         = local.network.self_link
-      subnetwork      = module.subnetwork_main["usc1"].private_subnets["01"].self_link
-      service_account = module.composer_config_sa["usc1"].email
-    }
-  }
+  project    = var.project
+  prefix     = each.key
+  region     = each.value
+  network    = local.network.self_link
+  subnetwork = module.subnetwork_other[each.key].subnets["composer"]
+  account    = module.composer_config_sa[each.key].email
+  config     = var.composer_config[each.key]
+  tags       = var.tags
 }
 
 

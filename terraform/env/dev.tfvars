@@ -64,8 +64,9 @@ subnet_cidr_block_main = {
 }
 subnet_cidr_block_other = {
   "usc1" = {
-    gke = { az = "a", cidr = "150.1.0.0/22", private_access = true }
-    cfg = { az = "a", cidr = "50.1.0.0/20", private_access = true }
+    gke      = { az = "a", cidr = "150.1.0.0/16", private_access = true }
+    composer = { az = "a", cidr = "150.2.0.0/16", private_access = true }
+    cfg      = { az = "a", cidr = "50.1.0.0/20", private_access = true }
   }
 }
 
@@ -77,21 +78,21 @@ subnet_cidr_block_other = {
 composer_config = {
   "usc1" = {
     name             = "test-composer"
-    version          = "composer-2.0.28-airflow-2.3.3"
+    version          = "composer-2.0.25-airflow-2.2.5"
     environment_size = "ENVIRONMENT_SIZE_SMALL" # ENVIRONMENT_SIZE_SMALL, ENVIRONMENT_SIZE_MEDIUM, and ENVIRONMENT_SIZE_LARGE.
-    "software" = {
-      "airflow"       = {}
-      "pypi_packages" = {}
-      "env_variables" = {}
+    "software_config" = {
+      "airflow_config" = []
+      "pypi_packages"  = []
+      "env_variables"  = []
     }
-    "worker" = {
+    "workloads_config" = {
       "scheduler" = {
         cpu        = 0.5
         memory_gb  = 1.875
         storage_gb = 1
         count      = 1
       },
-      "webserver" = {
+      "web_server" = {
         cpu        = 0.5
         memory_gb  = 1.875
         storage_gb = 1
