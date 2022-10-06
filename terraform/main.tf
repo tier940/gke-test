@@ -142,15 +142,7 @@ module "composer_config_sa" {
 }
 
 # account role
-resource "google_service_account_iam_member" "composer_init_sa" {
-  depends_on = [module.composer_config_sa]
-  for_each   = var.region_list
-
-  service_account_id = module.composer_config_sa[each.key].id
-  role               = "roles/composer.ServiceAgentV2Ext"
-  member             = "serviceAccount:service-726713242948@cloudcomposer-accounts.iam.gserviceaccount.com"
-}
-module "composer_config_role" {
+module "composer_config_role_base" {
   depends_on = [module.composer_config_sa]
   source     = "./modules/account/role"
   for_each   = var.region_list
@@ -162,10 +154,24 @@ module "composer_config_role" {
     roles = ["roles/composer.worker"]
   }
 }
+module "composer_config_role_agent" {
+  depends_on = [module.composer_config_role_base]
+  source     = "./modules/account/role"
+  for_each   = var.region_list
+
+  project = var.project
+  iam = {
+    name = "service-726713242948@cloudcomposer-accounts.iam.gserviceaccount.com"
+    type = "serviceAccount"
+    roles = [
+      "roles/composer.ServiceAgentV2Ext"
+    ]
+  }
+}
 
 # composer
 # module "composer" {
-#   depends_on = [module.composer_config_role]
+#   depends_on = [module.composer_config_role_agent]
 #   source     = "./modules/composer"
 #   for_each   = var.region_list
 
@@ -178,38 +184,34 @@ module "composer_config_role" {
 #   tags       = var.tags
 # }
 resource "google_composer_environment" "default" {
-  depends_on = [google_service_account_iam_member.composer_init_sa]
+  depends_on = [module.composer_config_role_agent]
   project    = var.project.id
   name       = "example-composer-env-tf-c2"
   region     = "us-central1"
   config {
-
     software_config {
       image_version = "composer-2.0.28-airflow-2.3.3"
     }
-
-    workloads_config {
-      scheduler {
-        cpu        = 0.5
-        memory_gb  = 1.875
-        storage_gb = 1
-        count      = 1
-      }
-      web_server {
-        cpu        = 0.5
-        memory_gb  = 1.875
-        storage_gb = 1
-      }
-      worker {
-        cpu        = 0.5
-        memory_gb  = 1.875
-        storage_gb = 1
-        min_count  = 1
-        max_count  = 3
-      }
-
-
-    }
+    # workloads_config {
+    #   scheduler {
+    #     cpu        = 0.5
+    #     memory_gb  = 1.875
+    #     storage_gb = 1
+    #     count      = 1
+    #   }
+    #   web_server {
+    #     cpu        = 0.5
+    #     memory_gb  = 1.875
+    #     storage_gb = 1
+    #   }
+    #   worker {
+    #     cpu        = 0.5
+    #     memory_gb  = 1.875
+    #     storage_gb = 1
+    #     min_count  = 1
+    #     max_count  = 3
+    #   }
+    # }
     environment_size = "ENVIRONMENT_SIZE_SMALL"
 
     node_config {
