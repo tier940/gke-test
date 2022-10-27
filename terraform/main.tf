@@ -1,13 +1,22 @@
 locals {
-  # VPC設定値
+  # Defalut VPC
   network = {
     id        = google_compute_network.default.id
     self_link = google_compute_network.default.self_link
   }
 
-  # 初期サービスアカウント
+  # Default VPC subnets
+  subnetwork = {
+    id        = "projects/${var.project.id}/regions"                                         # /${var.region}/subnetworks/default
+    self_link = "https://www.googleapis.com/compute/v1/projects/${var.project.name}/regions" # /${var.region}/subnetworks/default"
+  }
+
+  # Default Service Account
   default_sa = {
-    gce = "${var.project.name}@appspot.gserviceaccount.com"
+    gce = {
+      id    = "projects/${var.project.id}/serviceAccounts/${var.project.id}-compute@developer.gserviceaccount.com"
+      email = "${var.project.id}-compute@developer.gserviceaccount.com"
+    }
   }
 }
 
@@ -127,66 +136,6 @@ resource "google_service_networking_connection" "default" {
 
 
 
-###################################
-## Cloud Composer
-###################################
-# service account for config
-module "composer_config_sa" {
-  depends_on = [module.subnetwork_main]
-  source     = "./modules/account"
-  for_each   = var.region_list
-
-  project     = var.project
-  account_id  = "${var.tags.stage}-${var.tags.env}-${var.composer_config[each.key].name}-${each.key}"
-  description = "Service Account for composer(${var.composer_config[each.key].name} on stage:${var.tags.stage}, env:${var.tags.env})"
-}
-
-# account role
-module "composer_config_role_base" {
-  depends_on = [module.composer_config_sa]
-  source     = "./modules/account/role"
-  for_each   = var.region_list
-
-  project = var.project
-  iam = {
-    name  = module.composer_config_sa[each.key].email
-    type  = "serviceAccount"
-    roles = ["roles/composer.worker"]
-  }
-}
-module "composer_config_role_agent" {
-  depends_on = [module.composer_config_role_base]
-  source     = "./modules/account/role"
-  for_each   = var.region_list
-
-  project = var.project
-  iam = {
-    name = "service-726713242948@cloudcomposer-accounts.iam.gserviceaccount.com"
-    type = "serviceAccount"
-    roles = [
-      "roles/composer.ServiceAgentV2Ext"
-    ]
-  }
-}
-
-# composer
-module "composer_instance" {
-  depends_on = [module.composer_config_role_agent]
-  source     = "./modules/composer"
-  for_each   = var.region_list
-
-  project    = var.project
-  prefix     = each.key
-  region     = each.value
-  network    = local.network.self_link
-  subnetwork = module.subnetwork_other[each.key].subnets["composer"]
-  account    = module.composer_config_sa[each.key].email
-  config     = var.composer_config[each.key]
-  tags       = var.tags
-}
-
-
-
 # ###################################
 # ## GCE
 # ###################################
@@ -244,123 +193,123 @@ module "composer_instance" {
 
 
 
-# ###################################
-# ## GKE
-# ###################################
-# # service account
-# module "gke_sa" {
-#   depends_on = [module.subnetwork_other]
-#   source     = "./modules/account"
-#   for_each   = var.region_list
+# # ###################################
+# # ## GKE
+# # ###################################
+# # # service account
+# # module "gke_sa" {
+# #   depends_on = [module.subnetwork_other]
+# #   source     = "./modules/account"
+# #   for_each   = var.region_list
 
-#   project     = var.project
-#   account_id  = "${var.tags.stage}-${var.tags.env}-${var.gke_config[each.key].name}-${each.key}"
-#   description = "Service Account for gke node(${var.gke_config[each.key].name} on stage:${var.tags.stage}, env:${var.tags.env})"
-# }
+# #   project     = var.project
+# #   account_id  = "${var.tags.stage}-${var.tags.env}-${var.gke_config[each.key].name}-${each.key}"
+# #   description = "Service Account for gke node(${var.gke_config[each.key].name} on stage:${var.tags.stage}, env:${var.tags.env})"
+# # }
 
-# # account role
-# module "gke_sa_role" {
-#   depends_on = [module.gke_sa]
-#   source     = "./modules/account/role"
-#   for_each   = var.region_list
+# # # account role
+# # module "gke_sa_role" {
+# #   depends_on = [module.gke_sa]
+# #   source     = "./modules/account/role"
+# #   for_each   = var.region_list
 
-#   project = var.project
-#   iam = {
-#     name = module.gke_sa[each.key].email
-#     type = "serviceAccount"
-#     roles = [
-#       "roles/container.admin",
-#       "roles/iam.serviceAccountUser",
-#       "roles/file.editor"
-#     ]
-#   }
-# }
+# #   project = var.project
+# #   iam = {
+# #     name = module.gke_sa[each.key].email
+# #     type = "serviceAccount"
+# #     roles = [
+# #       "roles/container.admin",
+# #       "roles/iam.serviceAccountUser",
+# #       "roles/file.editor"
+# #     ]
+# #   }
+# # }
 
-# # cluster
-# module "gke" {
-#   depends_on = [module.gke_sa_role]
-#   source     = "./modules/gke"
-#   for_each   = var.region_list
+# # # cluster
+# # module "gke" {
+# #   depends_on = [module.gke_sa_role]
+# #   source     = "./modules/gke"
+# #   for_each   = var.region_list
 
-#   tags      = var.tags
-#   project   = var.project
-#   vpc_id    = local.network.id
-#   prefix    = each.key
-#   region    = each.value
-#   account   = module.gke_sa[each.key].email
-#   subnets   = module.subnetwork_other[each.key].subnets["gke"]
-#   source_fw = [google_compute_firewall.default.name]
-#   configs   = var.gke_config[each.key]
-# }
-
-
-
-# ###################################
-# ## Cloud SQL
-# ###################################
-# module "sql_instance" {
-#   depends_on = [
-#     module.subnetwork_main,
-#     google_service_networking_connection.default
-#   ]
-#   source   = "./modules/sql"
-#   for_each = var.region_list
-
-#   tags    = var.tags
-#   project = var.project
-#   network = local.network.self_link
-#   prefix  = each.key
-#   region  = each.value
-#   configs = var.sql_config[each.key]
-# }
+# #   tags      = var.tags
+# #   project   = var.project
+# #   vpc_id    = local.network.id
+# #   prefix    = each.key
+# #   region    = each.value
+# #   account   = module.gke_sa[each.key].email
+# #   subnets   = module.subnetwork_other[each.key].subnets["gke"]
+# #   source_fw = [google_compute_firewall.default.name]
+# #   configs   = var.gke_config[each.key]
+# # }
 
 
 
-# ###################################
-# ## GCE firewall
-# ###################################
-# # config
-# module "gce_config_firewall" {
-#   depends_on = [module.gce_config]
-#   source     = "./modules/vpc/firewall"
-#   for_each   = var.region_list
+# # ###################################
+# # ## Cloud SQL
+# # ###################################
+# # module "sql_instance" {
+# #   depends_on = [
+# #     module.subnetwork_main,
+# #     google_service_networking_connection.default
+# #   ]
+# #   source   = "./modules/sql"
+# #   for_each = var.region_list
 
-#   project            = var.project
-#   target_tags        = [module.gce_config[each.key].instances.tag]
-#   target_tag_default = google_compute_firewall.default.name
-#   network            = local.network.self_link
-#   ingress = {
-#     ssh = { name = "gce-config-${each.key}-ssh", cidrs = ["0.0.0.0/0"], ports = [22], desc = "Allow from core_config" }
-#   }
-# }
+# #   tags    = var.tags
+# #   project = var.project
+# #   network = local.network.self_link
+# #   prefix  = each.key
+# #   region  = each.value
+# #   configs = var.sql_config[each.key]
+# # }
 
 
 
-# ###################################
-# ## Cloud DNS
-# ###################################
-# # zone
-# module "dns_zone" {
-#   source   = "./modules/dns/zone"
-#   for_each = var.region_list
+###################################
+## GCE firewall
+###################################
+# config
+module "gce_config_firewall" {
+  depends_on = [module.gce_config]
+  source     = "./modules/vpc/firewall"
+  for_each   = var.region_list
 
-#   tags    = var.tags
-#   project = var.project
-#   prefix  = each.key
-#   private = {
-#     internal = { name = "internal", dns_name = "vpc.internal.", network = google_compute_network.default.id }
-#   }
-# }
+  project            = var.project
+  target_tags        = [module.gce_config[each.key].instances.tag]
+  target_tag_default = google_compute_firewall.default.name
+  network            = local.network.self_link
+  ingress = {
+    ssh = { name = "gce-config-${each.key}-ssh", cidrs = ["0.0.0.0/0"], ports = [22], desc = "Allow from core_config" }
+  }
+}
 
-# # Record cloud sql
-# module "dns_record_sql" {
-#   depends_on = [module.dns_zone, module.sql_instance]
-#   source     = "./modules/dns/record"
-#   for_each   = var.region_list
 
-#   project = var.project
-#   zone    = module.dns_zone[each.key].private["internal"]
-#   name    = "sql"
-#   rrdatas = [values(module.sql_instance[each.key].instances.private_ip)]
-#   type    = "A"
-# }
+
+# # ###################################
+# # ## Cloud DNS
+# # ###################################
+# # # zone
+# # module "dns_zone" {
+# #   source   = "./modules/dns/zone"
+# #   for_each = var.region_list
+
+# #   tags    = var.tags
+# #   project = var.project
+# #   prefix  = each.key
+# #   private = {
+# #     internal = { name = "internal", dns_name = "vpc.internal.", network = google_compute_network.default.id }
+# #   }
+# # }
+
+# # # Record cloud sql
+# # module "dns_record_sql" {
+# #   depends_on = [module.dns_zone, module.sql_instance]
+# #   source     = "./modules/dns/record"
+# #   for_each   = var.region_list
+
+# #   project = var.project
+# #   zone    = module.dns_zone[each.key].private["internal"]
+# #   name    = "sql"
+# #   rrdatas = [values(module.sql_instance[each.key].instances.private_ip)]
+# #   type    = "A"
+# # }

@@ -1,11 +1,11 @@
+project = {
+  name = "test-gke"
+  id   = "sandbox-346202"
+}
 tags = {
   stage      = "dev"
   stage_full = "development"
   env        = "tier940"
-}
-project = {
-  name = "test-gke"
-  id   = "sandbox-346202"
 }
 gcp_services = {
   destroy   = false
@@ -38,8 +38,42 @@ gcp_services = {
     "composer.googleapis.com",          # Cloud Composer API
   ]
 }
-region_list = {
-  "usc1" = "us-central1"
+region_list = { # Comment out the regions you don't want to use.
+  # "ase1" = "asia-east1"
+  # "ase2" = "asia-east2"
+  "asn1" = "asia-northeast1"
+  # "asn2" = "asia-northeast2"
+  # "asn3" = "asia-northeast3"
+  # "asw1" = "asia-south1"
+  # "asw2" = "asia-south2"
+  # "ass1" = "asia-southeast1"
+  # "ass2" = "asia-southeast2"
+  # "aus1" = "australia-southeast1"
+  # "aus2" = "australia-southeast2"
+  # "euc2" = "europe-central2"
+  # "eun1" = "europe-north1"
+  # "eus1" = "europe-southwest1"
+  # "euw1" = "europe-west1"
+  # "euw2" = "europe-west2"
+  # "euw3" = "europe-west3"
+  # "euw4" = "europe-west4"
+  # "euw6" = "europe-west6"
+  # "euw8" = "europe-west8"
+  # "euw9" = "europe-west9"
+  # "mew1" = "me-west1"
+  # "nan1" = "northamerica-northeast1"
+  # "nan2" = "northamerica-northeast2"
+  # "sao1" = "southamerica-east1"
+  # "usc1" = "us-central1"
+  # "use1" = "us-east1"
+  # "use4" = "us-east4"
+  # "use5" = "us-east5"
+  # "use7" = "us-east7"
+  # "uss1" = "us-south1"
+  # "usw1" = "us-west1"
+  # "usw2" = "us-west2"
+  # "usw3" = "us-west3"
+  # "usw4" = "us-west4"
 }
 
 
@@ -67,44 +101,6 @@ subnet_cidr_block_other = {
     gke      = { az = "a", cidr = "150.1.0.0/16", private_access = true }
     composer = { az = "a", cidr = "150.2.0.0/16", private_access = true }
     cfg      = { az = "a", cidr = "50.1.0.0/20", private_access = true }
-  }
-}
-
-
-
-###################################
-#  Composer Config
-###################################
-composer_config = {
-  "usc1" = {
-    name             = "test-composer"
-    version          = "composer-2.0.25-airflow-2.2.5"
-    environment_size = "ENVIRONMENT_SIZE_SMALL" # ENVIRONMENT_SIZE_SMALL, ENVIRONMENT_SIZE_MEDIUM, and ENVIRONMENT_SIZE_LARGE.
-    "software_config" = {
-      "airflow_config" = []
-      "pypi_packages"  = []
-      "env_variables"  = []
-    }
-    "workloads_config" = {
-      "scheduler" = {
-        cpu        = 0.5
-        memory_gb  = 1.875
-        storage_gb = 1
-        count      = 1
-      },
-      "web_server" = {
-        cpu        = 0.5
-        memory_gb  = 1.875
-        storage_gb = 1
-      },
-      "worker" = {
-        cpu        = 0.5
-        memory_gb  = 1.875
-        storage_gb = 1
-        min_count  = 1
-        max_count  = 3
-      }
-    }
   }
 }
 
